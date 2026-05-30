@@ -1016,7 +1016,7 @@ document.addEventListener('submit', async function(e) {
 });
 
 document.addEventListener('click', function(e) {
-  var link = e.target.closest('a[href^="?route="]');
+  var link = e.target.closest('a[href^="?route="]:not([data-action])');
   if (link) { e.preventDefault(); navigate(link.getAttribute('href')); return; }
 });
 
