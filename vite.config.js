@@ -36,13 +36,13 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': {
+      '/.netlify/functions/send-email': {
         target: 'https://api.resend.com',
         changeOrigin: true,
-        rewrite: function(path) { return path.replace(/^\/api/, ''); },
+        rewrite: function() { return '/emails'; },
         configure: function(proxy) {
           proxy.on('proxyReq', function(proxyReq, req) {
-            proxyReq.setHeader('Authorization', 'Bearer re_W4ZNMpxg_Fh54MeR6vNdX9iQfcw6TmtSV');
+            proxyReq.setHeader('Authorization', 'Bearer ' + (process.env.RESEND_API_KEY || 're_W4ZNMpxg_Fh54MeR6vNdX9iQfcw6TmtSV'));
           });
         },
       },

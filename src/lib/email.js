@@ -1,5 +1,5 @@
 export function sendOTPEmail(email, otp, subject) {
-  fetch('/api/emails', {
+  fetch('/.netlify/functions/send-email', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
