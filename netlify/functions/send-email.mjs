@@ -14,10 +14,7 @@ export async function handler(event) {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
-  var apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'RESEND_API_KEY not configured' }) };
-  }
+  var apiKey = process.env.RESEND_API_KEY || 're_2XXYPRhZ_E1KQeiVCNSF22dGPvUJnUZri';
 
   var body;
   try {
