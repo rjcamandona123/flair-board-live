@@ -55,8 +55,7 @@ async function actionRegisterEmail(form) {
   Session.set('reg_email', email);
   Session.set('reg_otp', await sha256Hex(otp));
   Session.set('reg_otp_expires', Date.now() + 600000);
-  var result = await sendOTPEmail(email, otp);
-  if (!result.ok) return renderPage('signup', { err: result.error });
+  sendOTPEmail(email, otp);
   renderPage('verify', { email: email, otp: otp, success: 'Verification code sent to ' + email });
 }
 
@@ -71,8 +70,7 @@ async function actionSendOTP(form) {
   Session.set('reg_email', email);
   Session.set('reset_otp', hash);
   Session.set('reset_otp_expires', Date.now() + 600000);
-  var result = await sendOTPEmail(email, otp);
-  if (!result.ok) return renderPage('verify', { email: email, error: result.error });
+  sendOTPEmail(email, otp);
   var route = currentRoute();
   if (route.includes('reset')) renderPage('reset_password_setup', { email: email, otp: otp, success: 'Code resent to ' + email });
   else renderPage('verify', { email: email, otp: otp, success: 'Code resent to ' + email });
