@@ -1,6 +1,5 @@
 import { createSignal, createEffect, createRoot, Switch, Match } from 'solid-js';
 
-import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import VerifyPage from './pages/VerifyPage';
 import SetupPage from './pages/SetupPage';
@@ -817,6 +816,11 @@ function htmlCard(b) {
   return '<div class="board-card" data-board-id="' + escAttr(b.id) + '"><a href="?route=board/' + escAttr(b.id) + '" class="board-card-link"><div class="board-card-preview"><div class="board-card-cork"><div class="board-card-flairs"><span class="mini-count">' + (b.pin_count || '') + '</span></div></div></div><div class="board-card-info"><span class="board-card-name">' + esc(b.name) + '</span></div></a><div class="board-card-actions"><button class="btn-toggle ' + (b.is_public ? 'public' : 'private') + '" data-action="toggle_public" data-board-id="' + b.id + '">' + (b.is_public ? 'Public' : 'Private') + '</button><button class="btn-delete" data-action="delete_board" data-board-id="' + b.id + '">🗑️</button></div></div>';
 }
 
+function renderLoginPage(el) {
+  var err = pagePropsSig().err;
+  el.innerHTML = '<div class="login-container"><div class="login-logo"><div class="login-flair-icon">📌</div><h1>Flair Board</h1><p class="login-subtitle">Pin your favorite things</p></div><form class="login-form" onsubmit="event.preventDefault();window.actionLogin(this)">' + (err ? '<div class="login-error">' + esc(err) + '</div>' : '') + '<h2>Sign In</h2><div class="form-group"><label>Email or Username</label><input type="text" name="login" required placeholder="you@example.com or username"></div><div class="form-group"><label>Password</label><input type="password" name="password" required minlength="4" placeholder="Enter password"></div><button type="submit" class="btn-primary">Sign In</button></form><p class="login-toggle">Don\'t have an account? <a href="?route=signup">Register</a></p><p class="login-toggle" style="margin-top:4px"><a href="?route=forgot-password">Forgot password?</a></p></div>';
+}
+
 function renderUploadsPage(el) {
   var u = uid();
   if (!u) { navigate('?route=login'); return; }
@@ -946,10 +950,11 @@ function App() {
 
   createEffect(function() {
     var page = currentPageSig();
-    if (page === 'uploads' || (typeof page === 'string' && (page.startsWith('board/') || page.startsWith('public/')))) {
+    if (page === 'login' || page === 'uploads' || (typeof page === 'string' && (page.startsWith('board/') || page.startsWith('public/')))) {
       var node = el;
       if (!node) return;
-      if (page === 'uploads') renderUploadsPage(node);
+      if (page === 'login') renderLoginPage(node);
+      else if (page === 'uploads') renderUploadsPage(node);
       else if (page.startsWith('board/')) renderBoardPage(node);
       else if (page.startsWith('public/')) renderPublicBoardPage(node);
     }
@@ -958,7 +963,6 @@ function App() {
   return (
     <div ref={el}>
       <Switch>
-        <Match when={currentPageSig() === 'login'}><LoginPage {...(pagePropsSig())} /></Match>
         <Match when={currentPageSig() === 'signup'}><RegisterPage {...(pagePropsSig())} /></Match>
         <Match when={currentPageSig() === 'verify'}><VerifyPage {...(pagePropsSig())} /></Match>
         <Match when={currentPageSig() === 'setup'}><SetupPage {...(pagePropsSig())} /></Match>
