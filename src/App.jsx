@@ -943,7 +943,7 @@ function renderPublicBoardPage(el) {
      + '<input type="file" name="image" accept="image/*" style="flex:1;min-width:100px">'
      + '<input type="color" name="color" value="#cc3333" style="width:40px;height:36px;padding:2px">'
      + '<input type="color" name="text_color" value="#ffffff" style="width:40px;height:36px;padding:2px">'
-     + '<button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px">Add</button>'
+     + '<button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px" data-action="add_pin">Add</button>'
     + '</form></div></details></div>';
   bindBoardSVGs();
 }
