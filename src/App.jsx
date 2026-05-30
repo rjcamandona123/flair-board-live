@@ -813,7 +813,7 @@ function tableColorVisual(el) {
 function renderNavbarHTML() {
   var u = getUser();
   if (!u) return '';
-  return '<nav class="navbar"><a href="#/uploads" class="nav-brand">📌 Flair Board</a><div class="nav-links"><span class="nav-user">' + esc(u.username) + '</span><a href="#/uploads">My Boards</a><a href="#/logout" class="btn-logout">Logout</a></div></nav>';
+  return '<nav class="navbar"><a href="#/uploads" class="nav-brand">📌 Flair Board</a><div class="nav-links"><span class="nav-user">' + esc(u.username) + '</span><a href="#/uploads">My Boards</a><a href="/login" class="btn-logout" data-action="logout">Logout</a></div></nav>';
 }
 
 function htmlCard(b) {

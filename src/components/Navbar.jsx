@@ -8,7 +8,7 @@ export default function Navbar(props) {
       <div class="nav-links">
         <span class="nav-user">{esc(props.user.username)}</span>
         <a href="#/uploads">My Boards</a>
-        <a href="#/logout" class="btn-logout">Logout</a>
+        <a href="/login" class="btn-logout">Logout</a>
       </div>
     </nav>
   );
