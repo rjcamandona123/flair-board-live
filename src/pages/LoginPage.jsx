@@ -24,8 +24,8 @@ export default function LoginPage(props) {
         </div>
         <button type="submit" class="btn-primary">Sign In</button>
       </form>
-      <p class="login-toggle">Don't have an account? <a href="#/signup">Register</a></p>
-      <p class="login-toggle" style="margin-top:4px"><a href="#/forgot-password">Forgot password?</a></p>
+      <p class="login-toggle">Don't have an account? <a href="?route=signup">Register</a></p>
+      <p class="login-toggle" style="margin-top:4px"><a href="?route=forgot-password">Forgot password?</a></p>
     </div>
   );
 }

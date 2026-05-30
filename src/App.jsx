@@ -44,7 +44,7 @@ async function actionLogin(form) {
     if (expected !== actual) { setCurrentPage('login'); return; }
   } else if (stored !== password) { setCurrentPage('login'); return; }
   Session.set('user_id', foundId);
-  navigate('#/uploads');
+  navigate('?route=uploads');
 }
 
 async function actionRegisterEmail(form) {
@@ -89,7 +89,7 @@ async function actionVerifyOTP(form) {
   if ((await sha256Hex(code)) !== storedHash) return renderPage('verify', { email: email, error: 'Invalid code' });
   Session.set('reg_verified', true);
   Session.delete('reg_otp');
-  navigate('#/setup');
+  navigate('?route=setup');
 }
 
 async function actionCompleteRegistration(form) {
@@ -101,7 +101,7 @@ async function actionCompleteRegistration(form) {
   if (password.length < 4) return renderPage('setup', { err: 'Password must be at least 4 characters' });
   var email = Session.get('reg_email');
   var verified = Session.get('reg_verified');
-  if (!email || !verified) return navigate('/login');
+  if (!email || !verified) return navigate('?route=login');
   var users = Store.read('users') || {};
   for (var key in users) {
     var u = users[key];
@@ -114,7 +114,7 @@ async function actionCompleteRegistration(form) {
   Store.write('users', users);
   Session.delete('reg_email'); Session.delete('reg_otp'); Session.delete('reg_verified');
   Session.set('user_id', id);
-  navigate('#/uploads');
+  navigate('?route=uploads');
 }
 
 async function actionForgotPassword(form) {
@@ -155,19 +155,19 @@ async function actionResetPassword(form) {
     }
   }
   Session.delete('reset_otp'); Session.delete('reset_otp_expires');
-  navigate('/login');
+  navigate('?route=login');
 }
 
 async function actionCreateBoard(form) {
   var data = Object.fromEntries(new FormData(form));
   var name = (data.name || '').trim() || 'Untitled';
   var u = uid();
-  if (!u) return navigate('/login');
+  if (!u) return navigate('?route=login');
   var id = String(Store.nextId('next_board_id'));
   var boards = Store.read('boards') || {};
   boards[id] = { id: id, user_id: u, name: name, is_public: 0, pin_count: 0 };
   Store.write('boards', boards);
-  navigate('#/board/' + id);
+  navigate('?route=board/' + id);
 }
 
 async function actionDeleteBoard(el) {
@@ -179,7 +179,7 @@ async function actionDeleteBoard(el) {
   var pins = Store.read('pins') || {};
   for (var key in pins) { if (String(pins[key].board_id) === String(bid)) delete pins[key]; }
   try { Store.write('pins', pins); } catch(e) { /* quota exceeded on delete - can safely ignore */ }
-  navigate('#/uploads');
+  navigate('?route=uploads');
 }
 
 async function actionTogglePublic(el) {
@@ -353,7 +353,7 @@ function actionMovePin(data) {
   }
 }
 
-function actionLogout() { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); }
+function actionLogout() { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('?route=login'); }
 
 // ============================================================
 // Routing
@@ -364,7 +364,7 @@ var ROUTES = {
   'uploads': 'uploads'
 };
 
-function navigate(href) { location.hash = href; }
+function navigate(href) { history.pushState(null, '', href); handleRoute(); }
 
 // ============================================================
 // Signals
@@ -382,25 +382,21 @@ function handleRoute() {
   var route = currentRoute();
   var parts = route.split('/');
   var base = parts[0];
-  if (base === 'logout') { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); return; }
+  if (base === 'logout') { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('?route=login'); return; }
   var u = uid();
   var guarded = ['', 'uploads', 'board', 'public'];
   var pub = ['login', 'signup', 'verify', 'setup', 'forgot-password', 'reset-password-setup'];
-  if (guarded.includes(base) && !u && !pub.includes(base)) { navigate('/login'); return; }
+  if (guarded.includes(base) && !u && !pub.includes(base)) { navigate('?route=login'); return; }
   if (ROUTES[route] !== undefined) {
     var page = ROUTES[route];
-    if (page === 'login' && u) { navigate('#/uploads'); return; }
+    if (page === 'login' && u) { navigate('?route=uploads'); return; }
     setCurrentPage(page);
   } else {
     setCurrentPage(route);
   }
 }
 
-window.addEventListener('hashchange', function() {
-  var r = currentRoute();
-  if (r.startsWith('logout')) { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); return; }
-createRoot(function() { handleRoute(); });
-});
+window.addEventListener('popstate', function() { handleRoute(); });
 
 handleRoute();
 
@@ -813,17 +809,17 @@ function tableColorVisual(el) {
 function renderNavbarHTML() {
   var u = getUser();
   if (!u) return '';
-  return '<nav class="navbar"><a href="#/uploads" class="nav-brand">📌 Flair Board</a><div class="nav-links"><span class="nav-user">' + esc(u.username) + '</span><a href="#/uploads">My Boards</a><a href="/login" class="btn-logout" data-action="logout">Logout</a></div></nav>';
+  return '<nav class="navbar"><a href="?route=uploads" class="nav-brand">📌 Flair Board</a><div class="nav-links"><span class="nav-user">' + esc(u.username) + '</span><a href="?route=uploads">My Boards</a><a href="?route=login" class="btn-logout" data-action="logout">Logout</a></div></nav>';
 }
 
 function htmlCard(b) {
   var color = stringToColor(b.name);
-  return '<div class="board-card" data-board-id="' + escAttr(b.id) + '"><a href="#/board/' + escAttr(b.id) + '" class="board-card-link"><div class="board-card-preview"><div class="board-card-cork"><div class="board-card-flairs"><span class="mini-count">' + (b.pin_count || '') + '</span></div></div></div><div class="board-card-info"><span class="board-card-name">' + esc(b.name) + '</span></div></a><div class="board-card-actions"><button class="btn-toggle ' + (b.is_public ? 'public' : 'private') + '" data-action="toggle_public" data-board-id="' + b.id + '">' + (b.is_public ? 'Public' : 'Private') + '</button><button class="btn-delete" data-action="delete_board" data-board-id="' + b.id + '">🗑️</button></div></div>';
+  return '<div class="board-card" data-board-id="' + escAttr(b.id) + '"><a href="?route=board/' + escAttr(b.id) + '" class="board-card-link"><div class="board-card-preview"><div class="board-card-cork"><div class="board-card-flairs"><span class="mini-count">' + (b.pin_count || '') + '</span></div></div></div><div class="board-card-info"><span class="board-card-name">' + esc(b.name) + '</span></div></a><div class="board-card-actions"><button class="btn-toggle ' + (b.is_public ? 'public' : 'private') + '" data-action="toggle_public" data-board-id="' + b.id + '">' + (b.is_public ? 'Public' : 'Private') + '</button><button class="btn-delete" data-action="delete_board" data-board-id="' + b.id + '">🗑️</button></div></div>';
 }
 
 function renderUploadsPage(el) {
   var u = uid();
-  if (!u) { navigate('/login'); return; }
+  if (!u) { navigate('?route=login'); return; }
   var boards = getBoards(u);
   var cards = boards.map(htmlCard).join('');
   if (!cards) cards = '<p class="empty-msg">No boards yet. Create your first one!</p>';
@@ -839,7 +835,7 @@ function renderBoardPage(el) {
   var bid = parts[1];
   var boards = Store.read('boards') || {};
   var board = boards[bid];
-  if (!board) { el.innerHTML = renderNavbarHTML() + '<div class="page-content"><h2>Board Not Found</h2><a href="#/uploads">Back</a></div>'; return; }
+  if (!board) { el.innerHTML = renderNavbarHTML() + '<div class="page-content"><h2>Board Not Found</h2><a href="?route=uploads">Back</a></div>'; return; }
   var u = uid();
   var isOwner = board.user_id === u;
   var pins = getPins(bid);
@@ -859,9 +855,9 @@ function renderBoardPage(el) {
   var gridLines = '';
   for (var gx = 40; gx < 800; gx += 40) gridLines += '<line x1="' + gx + '" y1="12" x2="' + gx + '" y2="488"/>';
   for (var gy = 40; gy < 500; gy += 40) gridLines += '<line x1="12" y1="' + gy + '" x2="788" y2="' + gy + '"/>';
-  var embedSection = board.is_public ? '<div class="embed-section"><h3 class="embed-heading">📋 Share / Embed this Board</h3><div class="embed-body"><label class="embed-label">Public URL:</label><div class="embed-copy-row"><input type="text" class="embed-copy-input" readonly value="' + escAttr(location.origin + location.pathname + '#/public/' + bid) + '" spellcheck="false"><button class="embed-copy-btn" onclick="var i=this.previousElementSibling;i.select();navigator.clipboard.writeText(i.value);this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy\'}.bind(this),2000)">Copy</button></div><label class="embed-label">Embed iframe code:</label><div class="embed-copy-row"><input type="text" class="embed-copy-input" readonly value=\'<iframe src="' + escAttr(location.origin + location.pathname + '#/public/' + bid) + '" width="100%" height="600" frameborder="0"></iframe>\' spellcheck="false"><button class="embed-copy-btn" onclick="var i=this.previousElementSibling;i.select();navigator.clipboard.writeText(i.value);this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy\'}.bind(this),2000)">Copy</button></div><p class="embed-note">Visitors can add their own pins and delete only the ones they added.</p></div><div class="embed-preview"><div class="embed-preview-frame"><iframe src="' + escAttr(location.origin + location.pathname + '#/public/' + bid) + '" width="100%" height="450" frameborder="0"></iframe></div></div></div>' : '';
+  var embedSection = board.is_public ? '<div class="embed-section"><h3 class="embed-heading">📋 Share / Embed this Board</h3><div class="embed-body"><label class="embed-label">Public URL:</label><div class="embed-copy-row"><input type="text" class="embed-copy-input" readonly value="' + escAttr(location.origin + location.pathname + '?route=public/' + bid) + '" spellcheck="false"><button class="embed-copy-btn" onclick="var i=this.previousElementSibling;i.select();navigator.clipboard.writeText(i.value);this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy\'}.bind(this),2000)">Copy</button></div><label class="embed-label">Embed iframe code:</label><div class="embed-copy-row"><input type="text" class="embed-copy-input" readonly value=\'<iframe src="' + escAttr(location.origin + location.pathname + '?route=public/' + bid) + '" width="100%" height="600" frameborder="0"></iframe>\' spellcheck="false"><button class="embed-copy-btn" onclick="var i=this.previousElementSibling;i.select();navigator.clipboard.writeText(i.value);this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy\'}.bind(this),2000)">Copy</button></div><p class="embed-note">Visitors can add their own pins and delete only the ones they added.</p></div><div class="embed-preview"><div class="embed-preview-frame"><iframe src="' + escAttr(location.origin + location.pathname + '?route=public/' + bid) + '" width="100%" height="450" frameborder="0"></iframe></div></div></div>' : '';
   el.innerHTML = renderNavbarHTML() + '<div class="page-content board-page" id="board-page">'
-    + '<div class="board-header"><a href="#/uploads" class="btn-back">← Back</a><h2>' + esc(board.name) + '</h2><div class="board-header-actions">'
+    + '<div class="board-header"><a href="?route=uploads" class="btn-back">← Back</a><h2>' + esc(board.name) + '</h2><div class="board-header-actions">'
     + (isOwner ? '<button class="btn-toggle ' + (board.is_public ? 'public' : 'private') + '" data-action="toggle_public" data-board-id="' + bid + '">' + (board.is_public ? 'Public' : 'Private') + '</button>' : '')
     + '<button class="btn-mode" id="cursor-mode-toggle">' + (cursorMode === 'click' ? 'Click' : 'Drag') + '</button>'
     + '<button class="btn-primary" id="show-flair-picker" style="display:inline-block;width:auto">+ Add Flair</button>'
@@ -1017,6 +1013,11 @@ document.addEventListener('submit', async function(e) {
   e.preventDefault();
   var id = form.id;
   if (FORM_ACTIONS[id]) { await FORM_ACTIONS[id](form); return; }
+});
+
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a[href^="?route="]');
+  if (link) { e.preventDefault(); navigate(link.getAttribute('href')); return; }
 });
 
 document.addEventListener('click', async function(e) {

@@ -28,6 +28,6 @@ export async function sha256Hex(str) { const buf = await crypto.subtle.digest('S
 
 export async function hashSalt(salt, password) { return sha256Hex(salt + ':' + password); }
 
-export function currentRoute() { return location.hash.replace(/^#\//, '').replace(/^#/, ''); }
+export function currentRoute() { return new URLSearchParams(location.search).get('route') || ''; }
 
 export { contrastColor, hexToRgb };

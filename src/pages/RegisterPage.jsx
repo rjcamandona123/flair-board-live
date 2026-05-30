@@ -20,7 +20,7 @@ export default function RegisterPage(props) {
         </div>
         <button type="submit" class="btn-primary">Send Verification Code</button>
       </form>
-      <p class="login-toggle">Already have an account? <a href="#/login">Sign In</a></p>
+      <p class="login-toggle">Already have an account? <a href="?route=login">Sign In</a></p>
     </div>
   );
 }

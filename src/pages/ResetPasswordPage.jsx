@@ -37,7 +37,7 @@ export default function ResetPasswordPage(props) {
           <button type="submit" name="action_btn" value="reset_password" class="btn-primary">Reset</button>
         </div>
       </form>
-      <p class="login-toggle"><a href="#/login">Back to login</a></p>
+      <p class="login-toggle"><a href="?route=login">Back to login</a></p>
     </div>
   );
 }

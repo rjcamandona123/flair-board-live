@@ -20,7 +20,7 @@ export default function ForgotPasswordPage(props) {
         </div>
         <button type="submit" class="btn-primary">Send Reset Code</button>
       </form>
-      <p class="login-toggle"><a href="#/login">Back to login</a></p>
+      <p class="login-toggle"><a href="?route=login">Back to login</a></p>
     </div>
   );
 }

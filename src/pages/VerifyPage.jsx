@@ -34,7 +34,7 @@ export default function VerifyPage(props) {
           <button type="submit" class="btn-primary">Verify</button>
         </div>
       </form>
-      <p class="login-toggle"><a href="#/login">Back to login</a></p>
+      <p class="login-toggle"><a href="?route=login">Back to login</a></p>
     </div>
   );
 }
