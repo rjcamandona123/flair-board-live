@@ -353,7 +353,7 @@ function actionMovePin(data) {
   }
 }
 
-function actionLogout() { Session.clear(); navigate('#/login'); }
+function actionLogout() { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); }
 
 // ============================================================
 // Routing
@@ -382,7 +382,7 @@ function handleRoute() {
   var route = currentRoute();
   var parts = route.split('/');
   var base = parts[0];
-  if (base === 'logout') { Session.clear(); navigate('#/login'); return; }
+  if (base === 'logout') { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); return; }
   var u = uid();
   var guarded = ['', 'uploads', 'board', 'public'];
   var pub = ['login', 'signup', 'verify', 'setup', 'forgot-password', 'reset-password-setup'];
@@ -398,7 +398,7 @@ function handleRoute() {
 
 window.addEventListener('hashchange', function() {
   var r = currentRoute();
-  if (r.startsWith('logout')) { Session.clear(); navigate('#/login'); return; }
+  if (r.startsWith('logout')) { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); return; }
 createRoot(function() { handleRoute(); });
 });
 
