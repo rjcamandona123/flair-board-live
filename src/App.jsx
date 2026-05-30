@@ -55,8 +55,9 @@ async function actionRegisterEmail(form) {
   Session.set('reg_email', email);
   Session.set('reg_otp', await sha256Hex(otp));
   Session.set('reg_otp_expires', Date.now() + 600000);
-  sendOTPEmail(email, otp);
-  renderPage('verify', { email: email, otp: otp, success: 'Verification code sent to ' + email });
+  var result = await sendOTPEmail(email, otp);
+  if (!result.ok) return renderPage('signup', { err: result.error });
+  renderPage('verify', { email: email, success: 'Verification code sent to ' + email });
 }
 
 async function actionSendOTP(form) {
@@ -70,7 +71,8 @@ async function actionSendOTP(form) {
   Session.set('reg_email', email);
   Session.set('reset_otp', hash);
   Session.set('reset_otp_expires', Date.now() + 600000);
-  sendOTPEmail(email, otp);
+  var result = await sendOTPEmail(email, otp);
+  if (!result.ok) return renderPage('verify', { email: email, error: result.error });
   var route = currentRoute();
   if (route.includes('reset')) renderPage('reset_password_setup', { email: email, otp: otp, success: 'Code resent to ' + email });
   else renderPage('verify', { email: email, otp: otp, success: 'Code resent to ' + email });
@@ -126,8 +128,9 @@ async function actionForgotPassword(form) {
   Session.set('reset_email', email);
   Session.set('reset_otp', await sha256Hex(otp));
   Session.set('reset_otp_expires', Date.now() + 600000);
-  sendOTPEmail(email, otp, 'Your password reset code');
-  if (found) renderPage('reset_password_setup', { email: email, otp: otp, success: 'Reset code sent to ' + email });
+  var result = await sendOTPEmail(email, otp, 'Your password reset code');
+  if (!result.ok) return renderPage('forgot_password', { err: result.error });
+  if (found) renderPage('reset_password_setup', { email: email, success: 'Reset code sent to ' + email });
   else renderPage('forgot_password', { err: 'If that email exists, a reset code has been sent' });
 }
 
