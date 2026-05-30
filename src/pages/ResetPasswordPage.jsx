@@ -1,7 +1,9 @@
 import { Show } from 'solid-js';
 import { esc } from '../lib/utils';
+import { pagePropsSig } from '../App';
 
-export default function ResetPasswordPage(props) {
+export default function ResetPasswordPage() {
+  var p = pagePropsSig;
   return (
     <div class="login-container">
       <div class="login-logo">
@@ -10,17 +12,17 @@ export default function ResetPasswordPage(props) {
         <p class="login-subtitle">Enter the reset code</p>
       </div>
       <form class="login-form" onSubmit={function(e) { e.preventDefault(); var fd = new FormData(e.target); if (fd.get('action_btn') === 'send_otp') window.actionSendOTP(e.target); else window.actionResetPassword(e.target); }}>
-        <input type="hidden" name="email" value={props.email || ''} />
-        <Show when={props.err}>
-          <div class="login-error">{esc(props.err)}</div>
+        <input type="hidden" name="email" value={p().email || ''} />
+        <Show when={p().err}>
+          <div class="login-error">{esc(p().err)}</div>
         </Show>
-        <Show when={props.success}>
+        <Show when={p().success}>
           <div class="login-success">
-            {esc(props.success)}
+            {esc(p().success)}
           </div>
         </Show>
         <h2>Reset Password</h2>
-        <p style="color:#666;font-size:14px;margin-bottom:12px">Code sent to {esc(props.email || '')}</p>
+        <p style="color:#666;font-size:14px;margin-bottom:12px">Code sent to {esc(p().email || '')}</p>
         <div class="form-group">
           <label>Verification Code</label>
           <div class="otp-wrap">

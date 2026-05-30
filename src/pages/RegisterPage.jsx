@@ -1,7 +1,9 @@
 import { Show } from 'solid-js';
 import { esc } from '../lib/utils';
+import { pagePropsSig } from '../App';
 
-export default function RegisterPage(props) {
+export default function RegisterPage() {
+  var p = pagePropsSig;
   return (
     <div class="login-container">
       <div class="login-logo">
@@ -10,8 +12,8 @@ export default function RegisterPage(props) {
         <p class="login-subtitle">Pin your favorite things</p>
       </div>
       <form class="login-form" onSubmit={function(e) { e.preventDefault(); window.actionRegisterEmail(e.target); }}>
-        <Show when={props.err}>
-          <div class="login-error">{esc(props.err)}</div>
+        <Show when={p().err}>
+          <div class="login-error">{esc(p().err)}</div>
         </Show>
         <h2>Register</h2>
         <div class="form-group">

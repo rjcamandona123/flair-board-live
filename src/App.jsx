@@ -56,7 +56,7 @@ async function actionRegisterEmail(form) {
   Session.set('reg_otp_expires', Date.now() + 600000);
   var result = await sendOTPEmail(email, otp);
   if (!result.ok) return renderPage('signup', { err: result.error });
-  renderPage('verify', { email: email, success: 'Verification code sent to ' + email });
+  renderPage('verify', { email: email, otp: otp, success: 'Verification code sent to ' + email });
 }
 
 async function actionSendOTP(form) {
@@ -363,13 +363,17 @@ var ROUTES = {
   'uploads': 'uploads'
 };
 
+var COMPONENT_PAGES = ['signup', 'verify', 'setup', 'forgot_password', 'reset_password_setup'];
+
+var appEl = null;
+
 function navigate(href) { history.pushState(null, '', href); handleRoute(); }
 
 // ============================================================
 // Signals
 // ============================================================
 var [currentPageSig, setCurrentPage] = createRoot(function() { return createSignal(null); });
-var [pagePropsSig, setPageProps] = createRoot(function() { return createSignal({}); });
+export var [pagePropsSig, setPageProps] = createRoot(function() { return createSignal({}); });
 
 function renderPage(page, props) {
   setPageProps(props || {});
@@ -389,6 +393,7 @@ function handleRoute() {
   if (ROUTES[route] !== undefined) {
     var page = ROUTES[route];
     if (page === 'login' && u) { navigate('?route=uploads'); return; }
+    if (COMPONENT_PAGES.includes(page) && appEl) appEl.innerHTML = '';
     setCurrentPage(page);
   } else {
     setCurrentPage(route);
@@ -882,7 +887,7 @@ function renderBoardPage(el) {
     + '<div id="pin-tooltip-url" class="pin-tooltip pin-tooltip-url hidden"><img class="tooltip-img" src="" alt=""><img class="tooltip-img-upload" src="" alt="" style="display:none;margin-left:4px"></div><div id="pin-tooltip-text" class="pin-tooltip pin-tooltip-text hidden"></div></div>'
     + (pins.length ? '<div class="pin-list"><details><summary class="embed-summary">📋 Pin List (' + pins.length + ')</summary><table><thead><tr><th>Icon</th><th>Label</th><th>Position</th><th>Color</th><th>Text</th><th></th></tr></thead><tbody>' + pinRows + '</tbody></table></details></div>' : '')
     + '<input type="color" id="pin-color-picker" style="position:fixed;top:-100px;left:-100px;width:0;height:0;opacity:0;pointer-events:none">'
-      + '<div id="flair-picker" class="flair-picker hidden"><h3>Add a Pin</h3><form id="add-pin-form" style="display:flex;flex-wrap:wrap;gap:6px"><input type="hidden" name="board_id" value="' + bid + '"><input type="hidden" name="x" value="400"><input type="hidden" name="y" value="250"><input type="url" name="url" placeholder="Title" style="flex:2;min-width:140px"><input type="text" name="label" placeholder="Text (optional)" style="flex:1;min-width:140px"><input type="file" name="image" accept="image/*" style="flex:1;min-width:100px"><input type="color" name="color" value="#cc3333" style="width:40px;height:36px;padding:2px"><input type="color" name="text_color" value="#ffffff" style="width:40px;height:36px;padding:2px"><button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px">Add Pin</button></form><button class="btn-secondary" style="display:block;width:100%;margin-top:8px;cursor:pointer" id="cancel-picker">Cancel</button></div>'
+      + '<div id="flair-picker" class="flair-picker hidden"><h3>Add a Pin</h3><form id="add-pin-form" novalidate style="display:flex;flex-wrap:wrap;gap:6px"><input type="hidden" name="board_id" value="' + bid + '"><input type="hidden" name="x" value="400"><input type="hidden" name="y" value="250"><label style="font-size:12px;color:#555;align-self:center">URL</label><input type="url" name="url" placeholder="URL" style="flex:2;min-width:140px"><input type="text" name="label" placeholder="Text (optional)" style="flex:1;min-width:140px"><input type="file" name="image" accept="image/*" style="flex:1;min-width:100px"><input type="color" name="color" value="#cc3333" style="width:40px;height:36px;padding:2px"><input type="color" name="text_color" value="#ffffff" style="width:40px;height:36px;padding:2px"><button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px">Add Pin</button></form><button class="btn-secondary" style="display:block;width:100%;margin-top:8px;cursor:pointer" id="cancel-picker">Cancel</button></div>'
     + '</div>';
   bindBoardSVGs();
 }
@@ -929,10 +934,11 @@ function renderPublicBoardPage(el) {
      + '<div id="pin-tooltip-url" class="pin-tooltip pin-tooltip-url hidden"><img class="tooltip-img" src="" alt=""><img class="tooltip-img-upload" src="" alt="" style="display:none;margin-left:4px"></div><div id="pin-tooltip-text" class="pin-tooltip pin-tooltip-text hidden"></div></div>'
      + '<details class="public-add-details" style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;color:#3b5998">+ Add your own flair</summary>'
     + '<div class="public-add-bar" style="margin:8px 0">'
-    + '<form id="public-add-pin-form" style="display:flex;flex-wrap:wrap;gap:6px;width:100%">'
+    + '<form id="public-add-pin-form" novalidate style="display:flex;flex-wrap:wrap;gap:6px;width:100%">'
     + '<input type="hidden" name="board_id" value="' + bid + '">'
-    + '<input type="hidden" name="x" value="400"><input type="hidden" name="y" value="250">'
-     + '<input type="url" name="url" placeholder="Title" style="flex:2;min-width:140px">'
+     + '<input type="hidden" name="x" value="400"><input type="hidden" name="y" value="250">'
+     + '<label style="font-size:12px;color:#555;align-self:center">URL</label>'
+     + '<input type="url" name="url" placeholder="URL" style="flex:2;min-width:140px">'
      + '<input type="text" name="label" placeholder="Text (optional)" style="flex:1;min-width:140px">'
      + '<input type="file" name="image" accept="image/*" style="flex:1;min-width:100px">'
      + '<input type="color" name="color" value="#cc3333" style="width:40px;height:36px;padding:2px">'
@@ -950,24 +956,22 @@ function App() {
 
   createEffect(function() {
     var page = currentPageSig();
-    if (page === 'login' || page === 'uploads' || (typeof page === 'string' && (page.startsWith('board/') || page.startsWith('public/')))) {
-      var node = el;
-      if (!node) return;
-      if (page === 'login') renderLoginPage(node);
-      else if (page === 'uploads') renderUploadsPage(node);
-      else if (page.startsWith('board/')) renderBoardPage(node);
-      else if (page.startsWith('public/')) renderPublicBoardPage(node);
-    }
+    var node = el;
+    if (!node) return;
+    if (page === 'login') renderLoginPage(node);
+    else if (page === 'uploads') renderUploadsPage(node);
+    else if (typeof page === 'string' && page.startsWith('board/')) renderBoardPage(node);
+    else if (typeof page === 'string' && page.startsWith('public/')) renderPublicBoardPage(node);
   });
 
   return (
-    <div ref={el}>
+    <div ref={function(v) { el = v; appEl = v; }}>
       <Switch>
-        <Match when={currentPageSig() === 'signup'}><RegisterPage {...(pagePropsSig())} /></Match>
-        <Match when={currentPageSig() === 'verify'}><VerifyPage {...(pagePropsSig())} /></Match>
-        <Match when={currentPageSig() === 'setup'}><SetupPage {...(pagePropsSig())} /></Match>
-        <Match when={currentPageSig() === 'forgot_password'}><ForgotPasswordPage {...(pagePropsSig())} /></Match>
-        <Match when={currentPageSig() === 'reset_password_setup'}><ResetPasswordPage {...(pagePropsSig())} /></Match>
+        <Match when={currentPageSig() === 'signup'}><RegisterPage /></Match>
+        <Match when={currentPageSig() === 'verify'}><VerifyPage /></Match>
+        <Match when={currentPageSig() === 'setup'}><SetupPage /></Match>
+        <Match when={currentPageSig() === 'forgot_password'}><ForgotPasswordPage /></Match>
+        <Match when={currentPageSig() === 'reset_password_setup'}><ResetPasswordPage /></Match>
       </Switch>
     </div>
   );
