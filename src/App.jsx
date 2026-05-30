@@ -101,7 +101,7 @@ async function actionCompleteRegistration(form) {
   if (password.length < 4) return renderPage('setup', { err: 'Password must be at least 4 characters' });
   var email = Session.get('reg_email');
   var verified = Session.get('reg_verified');
-  if (!email || !verified) return navigate('#/login');
+  if (!email || !verified) return navigate('/login');
   var users = Store.read('users') || {};
   for (var key in users) {
     var u = users[key];
@@ -155,14 +155,14 @@ async function actionResetPassword(form) {
     }
   }
   Session.delete('reset_otp'); Session.delete('reset_otp_expires');
-  navigate('#/login');
+  navigate('/login');
 }
 
 async function actionCreateBoard(form) {
   var data = Object.fromEntries(new FormData(form));
   var name = (data.name || '').trim() || 'Untitled';
   var u = uid();
-  if (!u) return navigate('#/login');
+  if (!u) return navigate('/login');
   var id = String(Store.nextId('next_board_id'));
   var boards = Store.read('boards') || {};
   boards[id] = { id: id, user_id: u, name: name, is_public: 0, pin_count: 0 };
@@ -353,7 +353,7 @@ function actionMovePin(data) {
   }
 }
 
-function actionLogout() { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); }
+function actionLogout() { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); }
 
 // ============================================================
 // Routing
@@ -382,11 +382,11 @@ function handleRoute() {
   var route = currentRoute();
   var parts = route.split('/');
   var base = parts[0];
-  if (base === 'logout') { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); return; }
+  if (base === 'logout') { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); return; }
   var u = uid();
   var guarded = ['', 'uploads', 'board', 'public'];
   var pub = ['login', 'signup', 'verify', 'setup', 'forgot-password', 'reset-password-setup'];
-  if (guarded.includes(base) && !u && !pub.includes(base)) { navigate('#/login'); return; }
+  if (guarded.includes(base) && !u && !pub.includes(base)) { navigate('/login'); return; }
   if (ROUTES[route] !== undefined) {
     var page = ROUTES[route];
     if (page === 'login' && u) { navigate('#/uploads'); return; }
@@ -398,7 +398,7 @@ function handleRoute() {
 
 window.addEventListener('hashchange', function() {
   var r = currentRoute();
-  if (r.startsWith('logout')) { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('#/login'); return; }
+  if (r.startsWith('logout')) { Session.clear(); setPageProps({}); setCurrentPage('login'); navigate('/login'); return; }
 createRoot(function() { handleRoute(); });
 });
 
@@ -823,7 +823,7 @@ function htmlCard(b) {
 
 function renderUploadsPage(el) {
   var u = uid();
-  if (!u) { navigate('#/login'); return; }
+  if (!u) { navigate('/login'); return; }
   var boards = getBoards(u);
   var cards = boards.map(htmlCard).join('');
   if (!cards) cards = '<p class="empty-msg">No boards yet. Create your first one!</p>';
