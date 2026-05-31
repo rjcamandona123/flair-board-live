@@ -1,6 +1,6 @@
 export async function sendOTPEmail(email, otp, subject) {
   try {
-    var res = await fetch('/.netlify/functions/send-email', {
+    var res = await fetch('/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

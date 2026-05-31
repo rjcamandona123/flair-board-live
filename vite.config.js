@@ -36,7 +36,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/.netlify/functions/send-email': {
+      '/send-email': {
         target: 'https://api.resend.com',
         changeOrigin: true,
         rewrite: function() { return '/emails'; },
