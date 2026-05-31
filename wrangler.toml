@@ -3,9 +3,11 @@ pages_build_output_dir = "dist"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Create a KV namespace in Cloudflare Dashboard:
-#   Workers & Pages → KV → Create namespace "FLAIR_KV"
-# Then paste the ID below.
-[[kv_namespaces]]
-binding = "FLAIR_KV"
-id = "your-kv-namespace-id"
+# Create a D1 database in Cloudflare Dashboard:
+#   Workers & Pages → D1 → Create database "flair-db"
+# Then paste the database ID below.
+# Initialize with: wrangler d1 execute flair-db --file=functions/api/schema.sql
+[[d1_databases]]
+binding = "FLAIR_DB"
+database_name = "flair-db"
+database_id = "your-d1-database-id"
