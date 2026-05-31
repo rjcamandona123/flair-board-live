@@ -1,5 +1,3 @@
-import * as cheerio from 'cheerio';
-
 export async function onRequest(context) {
   var url = new URL(context.request.url).searchParams.get('url');
   if (!url) {
@@ -15,26 +13,28 @@ export async function onRequest(context) {
     var resp = await fetch(base);
     if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
     var html = await resp.text();
-    var $ = cheerio.load(html);
 
-    var href = null;
-    var selectors = [
-      'link[rel="icon"]',
-      'link[rel="shortcut icon"]',
-      'link[rel="apple-touch-icon"]',
-      'link[rel~="icon"]',
+    var title = '';
+    var m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+    if (m) title = m[1].trim();
+    if (!title) title = parsed.hostname.replace(/^www\./, '');
+
+    var href = '';
+    var patterns = [
+      /<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']+)["']/i,
+      /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut )?icon["']/i,
+      /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i,
+      /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']apple-touch-icon["']/i,
     ];
-    for (var sel of selectors) {
-      href = $(sel).attr('href');
-      if (href) break;
+    for (var p of patterns) {
+      m = html.match(p);
+      if (m) { href = m[1]; break; }
     }
     if (href) {
       href = new URL(href, base).href;
     } else {
       href = base + '/favicon.ico';
     }
-
-    var title = $('title').first().text().trim() || parsed.hostname.replace(/^www\./, '');
 
     return Response.json({ favicon: href, title: title }, {
       headers: { 'Access-Control-Allow-Origin': '*' },

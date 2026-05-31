@@ -50,7 +50,12 @@ export async function onRequest(context) {
     }),
   });
 
-  var data = await res.json();
+  var data;
+  try {
+    data = await res.json();
+  } catch {
+    data = {};
+  }
 
   return new Response(JSON.stringify(data), {
     status: res.ok ? 200 : res.status,
