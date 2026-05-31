@@ -829,6 +829,10 @@ function renderLoginPage(el) {
 function renderUploadsPage(el) {
   var u = uid();
   if (!u) { navigate('?route=login'); return; }
+  if (window !== window.top) {
+    el.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:40px;color:#555"><h2>This page cannot be embedded</h2><p><a href="' + location.href + '" target="_top" style="color:#3b5998">Open in new tab</a></p></div>';
+    return;
+  }
   var boards = getBoards(u);
   var cards = boards.map(htmlCard).join('');
   if (!cards) cards = '<p class="empty-msg">No boards yet. Create your first one!</p>';
@@ -917,7 +921,7 @@ function renderPublicBoardPage(el) {
   for (var gx = 40; gx < 800; gx += 40) gridLines += '<line x1="' + gx + '" y1="12" x2="' + gx + '" y2="488"/>';
   for (var gy = 40; gy < 500; gy += 40) gridLines += '<line x1="12" y1="' + gy + '" x2="788" y2="' + gy + '"/>';
   el.innerHTML = '<div style="font-family:sans-serif;background:#e8e0d5;min-height:100vh;padding:10px">'
-    + '<div style="display:flex;align-items:center;gap:8px;margin:8px 0"><h2 style="color:#3b5998;font-size:18px;margin:0">📌 ' + esc(board.name) + '</h2><button class="btn-mode" id="cursor-mode-toggle">' + (cursorMode === 'click' ? 'Click' : 'Drag') + '</button></div>'
+    + '<div style="text-align:center;margin:8px 0"><span style="color:#3b5998;font-size:13px;font-weight:600">📌 ' + esc(board.name) + '</span></div>'
     + '<div class="flair-board-container" id="public-board-container">'
     + '<svg class="flair-board" id="public-flair-board" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">'
     + '<defs><filter id="cork-shadow"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-opacity="0.4"/></filter>'
@@ -943,7 +947,7 @@ function renderPublicBoardPage(el) {
      + '<input type="file" name="image" accept="image/*" style="flex:1;min-width:100px">'
      + '<input type="color" name="color" value="#cc3333" style="width:40px;height:36px;padding:2px">'
      + '<input type="color" name="text_color" value="#ffffff" style="width:40px;height:36px;padding:2px">'
-     + '<button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px" data-action="add_pin">Add</button>'
+     + '<button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px">Add Pin</button>'
     + '</form></div></details></div>';
   bindBoardSVGs();
 }
