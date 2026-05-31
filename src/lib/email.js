@@ -10,7 +10,9 @@ export async function sendOTPEmail(email, otp, subject) {
         html: 'Your Code #: ' + otp,
       }),
     });
-    var data = await res.json();
+    var text = await res.text();
+    if (!text) return { ok: false, error: 'Empty response from email server' };
+    var data = JSON.parse(text);
     if (!res.ok) return { ok: false, error: data.error || 'Email send failed (HTTP ' + res.status + ')' };
     return { ok: true };
   } catch (e) {

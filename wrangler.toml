@@ -1,0 +1,11 @@
+name = "flair-board"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Create a KV namespace in Cloudflare Dashboard:
+#   Workers & Pages → KV → Create namespace "FLAIR_KV"
+# Then paste the ID below.
+[[kv_namespaces]]
+binding = "FLAIR_KV"
+id = "your-kv-namespace-id"

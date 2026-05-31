@@ -30,9 +30,9 @@ export default function VerifyPage() {
         <h2>Verify Email</h2>
         <p style="color:#666;font-size:14px;margin-bottom:12px">Code sent to {esc(p().email || '')}</p>
         <div class="form-group">
-          <label>Verification Code</label>
+          <label for="otp">Verification Code</label>
           <div class="otp-wrap">
-            <input type="number" name="otp" class="otp-input" placeholder="000000" autocomplete="one-time-code" maxlength="6" />
+            <input type="number" name="otp" id="otp" class="otp-input" placeholder="000000" autocomplete="one-time-code" maxlength="6" />
             <div class="otp-slots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
           </div>
         </div>

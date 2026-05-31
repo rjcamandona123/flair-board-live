@@ -17,8 +17,8 @@ export default function ForgotPasswordPage() {
         </Show>
         <h2>Forgot Password</h2>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" name="email" required placeholder="you@example.com" />
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required placeholder="you@example.com" autocomplete="email" />
         </div>
         <button type="submit" class="btn-primary">Send Reset Code</button>
       </form>

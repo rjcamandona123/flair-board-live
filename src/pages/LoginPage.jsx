@@ -15,12 +15,12 @@ export default function LoginPage(props) {
         </Show>
         <h2>Sign In</h2>
         <div class="form-group">
-          <label>Email or Username</label>
-          <input type="text" name="login" required placeholder="you@example.com or username" />
+          <label for="login">Email or Username</label>
+          <input type="text" name="login" id="login" required placeholder="you@example.com or username" autocomplete="username" />
         </div>
         <div class="form-group">
-          <label>Password</label>
-          <input type="password" name="password" required minlength="4" placeholder="Enter password" />
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required minlength="4" placeholder="Enter password" autocomplete="current-password" />
         </div>
         <button type="submit" class="btn-primary">Sign In</button>
       </form>
